@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinSight Rapid · AI financial intelligence</title>
+  <!-- Bootstrap 5 CDN (only CSS needed for styling) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* subtle fintech polish */
+    body {
+      background: #f4f7fc;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    .card {
+      border: none;
+      border-radius: 24px;
+      box-shadow: 0 15px 35px rgba(0, 30, 60, 0.08);
+      backdrop-filter: blur(2px);
+      background-color: rgba(255,255,255,0.95);
+    }
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid rgba(0,70,150,0.1);
+      padding: 1.5rem 1.5rem 0.75rem 1.5rem;
+      font-weight: 500;
+    }
+    .form-control, .form-select {
+      border-radius: 16px;
+      border: 1px solid #dde3ed;
+      padding: 0.75rem 1rem;
+      background-color: #ffffff;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #1a5cff;
+      box-shadow: 0 0 0 3px rgba(26,92,255,0.15);
+    }
+    .btn-primary {
+      background-color: #0a2c4e;
+      border: none;
+      border-radius: 40px;
+      padding: 14px 20px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      background-image: linear-gradient(145deg, #0a2c4e, #133f66);
+      transition: all 0.2s;
+      box-shadow: 0 8px 18px rgba(10,44,78,0.15);
+    }
+    .btn-primary:hover {
+      background-image: linear-gradient(145deg, #0f3457, #1a4b78);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(10,44,78,0.2);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    .result-section {
+      background: #f0f5fe;
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid rgba(26,92,255,0.1);
+      margin-top: 1.8rem;
+    }
+    .result-item h6 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #2f4b7c;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+    }
+    .result-item p {
+      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      color: #14283c;
+      font-weight: 450;
+      line-height: 1.5;
+      background: white;
+      padding: 0.9rem 1.2rem;
+      border-radius: 18px;
+      box-shadow: 0 2px 6px rgba(0,20,40,0.02);
+    }
+    .badge-health {
+      display: inline-block;
+      background: #e4ebf7;
+      padding: 0.35rem 1rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #0a2c4e;
+    }
+    .header-title {
+      font-weight: 600;
+      color: #0a2c4e;
+      letter-spacing: -0.02em;
+    }
+    .header-sub {
+      color: #58748c;
+      font-weight: 400;
+    }
+    hr {
+      opacity: 0.4;
+      background-color: #b3c6dc;
+    }
+  </style>
+</head>
+<body class="d-flex align-items-center min-vh-100">
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8">
+
+        <!-- header section (clean above card) -->
+        <div class="text-center mb-4">
+          <h1 class="display-5 fw-semibold header-title">FinSight Rapid</h1>
+          <p class="lead header-sub">Real‑time AI financial intelligence</p>
+        </div>
+
+        <!-- main card -->
+        <div class="card">
+          <div class="card-body p-4 p-xl-5">
+
+            <!-- input form -->
+            <form id="finForm" class="needs-validation" novalidate>
+              <div class="row g-4">
+                <div class="col-12">
+                  <label class="form-label fw-medium text-secondary">Monthly revenue (USD)</label>
+                  <input type="number" step="0.01" min="0" class="form-control" id="revenue" placeholder="e.g. 85000" value="87500" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-medium text-secondary">Monthly expenses (USD)</label>
+                  <input type="number" step="0.01" min="0" class="form-control" id="expenses" placeholder="e.g. 62000" value="62300">
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-medium text-secondary">Existing debt (USD)</label>
+                  <input type="number" step="0.01" min="0" class="form-control" id="debt" placeholder="e.g. 45000" value="38000">
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-medium text-secondary">Business goal</label>
+                  <select class="form-select" id="goal">
+                    <option value="Loan Application" selected>Loan Application</option>
+                    <option value="Business Expansion">Business Expansion</option>
+                    <option value="Cash Flow Optimization">Cash Flow Optimization</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mt-5">
+                <button type="button" class="btn btn-primary w-100" id="analyzeBtn">Analyze</button>
+              </div>
+            </form>
+
+            <!-- output section (hidden initially) -->
+            <div id="resultPanel" class="result-section d-none">
+              <div class="result-item">
+                <h6>Business Health Status</h6>
+                <p id="healthStatus" class="mb-0">—</p>
+              </div>
+              <div class="result-item">
+                <h6>Cash Flow Analysis</h6>
+                <p id="cashFlowAnalysis" class="mb-0">—</p>
+              </div>
+              <div class="result-item">
+                <h6>Debt Risk Assessment</h6>
+                <p id="debtAssessment" class="mb-0">—</p>
+              </div>
+              <div class="result-item">
+                <h6>AI Recommendation</h6>
+                <p id="aiRecommendation" class="mb-0">—</p>
+              </div>
+            </div>
+
+            <!-- subtle fintech divider (optional) -->
+            <hr class="mt-4 mb-0">
+
+          </div> <!-- card-body -->
+        </div> <!-- card -->
+
+        <!-- footnote / placeholder for future API (design keeps minimal) -->
+        <p class="text-center text-muted small mt-4 opacity-50" style="letter-spacing:0.3px">intelligent simulation · finSight engine</p>
+
+      </div> <!-- col -->
+    </div> <!-- row -->
+  </div> <!-- container -->
+
+  <!-- JavaScript (internal, modern, commented) -->
+  <script>
+    (function() {
+      "use strict";
+
+      // DOM elements
+      const revenueInput = document.getElementById('revenue');
+      const expensesInput = document.getElementById('expenses');
+      const debtInput = document.getElementById('debt');
+      const goalSelect = document.getElementById('goal');
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const resultPanel = document.getElementById('resultPanel');
+
+      // Output fields
+      const healthEl = document.getElementById('healthStatus');
+      const cashEl = document.getElementById('cashFlowAnalysis');
+      const debtEl = document.getElementById('debtAssessment');
+      const aiEl = document.getElementById('aiRecommendation');
+
+      // Helper: format as USD with two decimals and commas
+      function formatMoney(value) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(value);
+      }
+
+      // Helper: safe parse float (invalid or empty -> 0)
+      function safeParse(numStr) {
+        const val = parseFloat(numStr);
+        return isNaN(val) ? 0 : val;
+      }
+
+      // Main analysis function (no API call, pure simulation)
+      function generateInsights() {
+        // 1. get raw values
+        const revenue = safeParse(revenueInput.value);
+        const expenses = safeParse(expensesInput.value);
+        const debt = safeParse(debtInput.value);
+        const goal = goalSelect.value;
+
+        // 2. core calculations
+        const netProfit = revenue - expenses;
+        const hasRevenue = revenue > 0;
+        // avoid division by zero: debtRatio only meaningful if revenue > 0
+        const debtRatio = hasRevenue ? debt / revenue : null;
+
+        // 3. business health logic (per spec)
+        let healthStatusText = '';
+        if (netProfit <= 0) {
+          healthStatusText = 'Critical';
+        } else if (netProfit > 0 && debtRatio !== null && debtRatio > 0.5) {
+          healthStatusText = 'High Risk';
+        } else if (netProfit > 0 && debtRatio !== null && debtRatio <= 0.5) {
+          healthStatusText = 'Stable';
+        } else {
+          // fallback for edge case (revenue = 0 and netProfit <=0 already covered)
+          healthStatusText = 'Critical (no revenue)';
+        }
+
+        // 4. generate cash flow analysis text
+        let cashFlowText = '';
+        if (netProfit > 0) {
+          const margin = (netProfit / revenue) * 100;
+          cashFlowText = `Net profit is ${formatMoney(netProfit)} (margin ${margin.toFixed(1)}%). Positive cash flow with healthy operational surplus.`;
+        } else if (netProfit === 0) {
+          cashFlowText = `Net profit is $0. Business is breaking even — no cash buffer.`;
+        } else {
+          cashFlowText = `Net loss of ${formatMoney(Math.abs(netProfit))}. Negative cash flow — immediate expense review needed.`;
+        }
+
+        // 5. debt risk assessment text
+        let debtText = '';
+        if (!hasRevenue) {
+          debtText = `Revenue is zero — debt-to-revenue ratio undefined. High vulnerability, no top line to service debt.`;
+        } else {
+          const ratioPercent = (debtRatio * 100).toFixed(1);
+          if (debtRatio <= 0.3) {
+            debtText = `Debt ratio is ${ratioPercent}% (low). Debt burden is manageable relative to revenue.`;
+          } else if (debtRatio <= 0.5) {
+            debtText = `Debt ratio is ${ratioPercent}% (moderate). Leverage is within acceptable range, but monitor interest coverage.`;
+          } else {
+            debtText = `Debt ratio is ${ratioPercent}% (high). Debt exceeds half of monthly revenue — refinancing or delevering advisable.`;
+          }
+        }
+
+        // 6. AI recommendation (tailored to goal + health)
+        let recommendation = '';
+
+        // helper for health base
+        const isCritical = healthStatusText.includes('Critical');
+        const isHighRisk = healthStatusText === 'High Risk';
+        const isStable = healthStatusText === 'Stable';
+
+        if (goal === 'Loan Application') {
+          if (isCritical) {
+            recommendation = `Loan application discouraged: negative/zero profit and/or no revenue. Strengthen margins before seeking debt.`;
+          } else if (isHighRisk) {
+            recommendation = `Lenders may view high debt ratio unfavourably. Consider debt consolidation or improve revenue to lower ratio.`;
+          } else if (isStable) {
+            recommendation = `Business profile fits loan criteria. Prepare cash flow statements and collateral overview.`;
+          } else {
+            recommendation = `Review financials carefully before applying.`;
+          }
+        } else if (goal === 'Business Expansion') {
+          if (isCritical) {
+            recommendation = `Expansion not recommended — core operations are not profitable. Focus on cost discipline first.`;
+          } else if (isHighRisk) {
+            recommendation = `Expansion would amplify leverage. Delay until debt ratio falls below 0.4.`;
+          } else if (isStable) {
+            recommendation = `Solid base for measured expansion. Preserve liquidity and model best/worst case scenarios.`;
+          } else {
+            recommendation = `Seek to stabilise revenue before expansion.`;
+          }
+        } else if (goal === 'Cash Flow Optimization') {
+          if (isCritical) {
+            recommendation = `Urgent: renegotiate payables, cut non‑essential costs, and accelerate receivables.`;
+          } else if (isHighRisk) {
+            recommendation = `Optimise by prioritising high‑interest debt and reviewing expense buckets.`;
+          } else if (isStable) {
+            recommendation = `Cash flow healthy — consider sweep accounts or short‑term investments for excess liquidity.`;
+          } else {
+            recommendation = `Build a cash buffer to smooth volatility.`;
+          }
+        } else {
+          recommendation = `Select a business goal for tailored advice.`;
+        }
+
+        // 7. update DOM
+        healthEl.textContent = healthStatusText;
+        cashEl.textContent = cashFlowText;
+        debtEl.textContent = debtText;
+        aiEl.textContent = recommendation;
+
+        // optionally style health status (simple background)
+        // remove any existing classes, then add a subtle background based on status
+        healthEl.className = 'mb-0'; // reset
+        if (healthStatusText === 'Stable') {
+          healthEl.classList.add('badge-health', 'bg-success', 'bg-opacity-10', 'text-success', 'px-3', 'py-2');
+        } else if (healthStatusText === 'High Risk') {
+          healthEl.classList.add('badge-health', 'bg-warning', 'bg-opacity-15', 'text-warning-emphasis', 'px-3', 'py-2');
+        } else if (healthStatusText.includes('Critical')) {
+          healthEl.classList.add('badge-health', 'bg-danger', 'bg-opacity-10', 'text-danger', 'px-3', 'py-2');
+        } else {
+          healthEl.classList.add('badge-health', 'bg-secondary', 'bg-opacity-10');
+        }
+
+        // show result panel
+        resultPanel.classList.remove('d-none');
+      }
+
+      // attach event listener to button
+      analyzeBtn.addEventListener('click', function(e) {
+        e.preventDefault();  // avoid any form-like behaviour
+        generateInsights();
+      });
+
+      // optional: trigger once with example values on page load? 
+      // but we keep hidden initially; user must click. 
+      // However we can call generateInsights once to show demo if desired? 
+      // The spec says "hidden initially", so we don't call on load.
+      // We'll leave it hidden.
+
+      // future API placeholder (as required)
+      /* ========== FUTURE API INTEGRATION PLACEHOLDER ========== 
+      // Replace simulation with real Groq / OpenAI call:
+      // fetch("YOUR_API_ENDPOINT", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     revenue, expenses, debt, goal
+      //   })
+      // })
+      // .then(res => res.json())
+      // .then(data => { ... update UI ... })
+      // .catch(err => console.error)
+      ========================================================== */
+
+    })();
+  </script>
+
+  <!-- Bootstrap JS (not strictly required, but kept for completeness - no effect on UI) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
